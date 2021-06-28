@@ -1,5 +1,6 @@
 package com.dio.personapi.service;
 
+import com.dio.personapi.dto.MessageResponseDTO;
 import com.dio.personapi.dto.request.PersonDTO;
 import com.dio.personapi.entity.Person;
 import com.dio.personapi.exception.PersonNotFoundException;
@@ -7,10 +8,8 @@ import com.dio.personapi.mapper.PersonMapper;
 import com.dio.personapi.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,13 +22,13 @@ public class PersonService {
         this.personRepository = personRepository;
     }
 
-    public PersonDTO createPerson(PersonDTO personDTO){
+    public MessageResponseDTO createPerson(PersonDTO personDTO){
+        Person savedPerson = savePerson(personDTO);
+        return MessageResponseDTO.builder().message("Created Person with ID "+ savedPerson.getId()).build();
+    }
 
-        Person savedPerson = personRepository.save(
-                personMapper.toModel(personDTO));
-
-        return personMapper.toDTO(savedPerson);
-
+    private Person savePerson(PersonDTO personDTO) {
+        return personRepository.save(personMapper.toModel(personDTO));
     }
 
     public List<PersonDTO> listAll() {
@@ -37,7 +36,22 @@ public class PersonService {
     }
 
     public PersonDTO findById(Long id) throws PersonNotFoundException {
-        Person person = personRepository.findById(id).orElseThrow(() -> new PersonNotFoundException(id));
+        Person person = verifyIfExists(id);
         return personMapper.toDTO(person);
+    }
+
+    public void deleteById(Long id) throws PersonNotFoundException {
+        verifyIfExists(id);
+        personRepository.deleteById(id);
+    }
+
+    private Person verifyIfExists(Long id) throws PersonNotFoundException {
+        return personRepository.findById(id).orElseThrow(() -> new PersonNotFoundException(id));
+    }
+
+    public MessageResponseDTO updatePerson(Long id, PersonDTO personDTO) throws PersonNotFoundException {
+        verifyIfExists(id);
+        savePerson(personDTO);
+        return MessageResponseDTO.builder().message("Update Person with ID "+ id).build();
     }
 }

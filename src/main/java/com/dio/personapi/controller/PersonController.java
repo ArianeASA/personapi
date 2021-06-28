@@ -1,5 +1,6 @@
 package com.dio.personapi.controller;
 
+import com.dio.personapi.dto.MessageResponseDTO;
 import com.dio.personapi.dto.request.PersonDTO;
 import com.dio.personapi.exception.PersonNotFoundException;
 import com.dio.personapi.service.PersonService;
@@ -20,7 +21,7 @@ public class PersonController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public PersonDTO createPerson(@RequestBody @Valid PersonDTO personDTO){
+    public MessageResponseDTO createPerson(@RequestBody @Valid PersonDTO personDTO){
         return personService.createPerson(personDTO);
     }
 
@@ -34,20 +35,16 @@ public class PersonController {
         return personService.findById(id);
     }
 
-//    @PutMapping
-//    public PersonDTO updatePerson(@RequestBody PersonDTO personDTO){
-//        return personService.updatePerson(personDTO);
-//    }
-//
-//
-//
-//    @DeleteMapping
-//    public void deleteAll(){
-//        return personService.deleteAll();
-//    }
-//
-//    @GetMapping("/{id}")
-//    public List<PersonDTO> deleteById(){
-//        return personService.listAll();
-//    }
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteById(@PathVariable Long id) throws PersonNotFoundException {
+        personService.deleteById(id);
+    }
+
+    @PutMapping("/{id}")
+    public MessageResponseDTO updatePerson(@PathVariable Long id, @RequestBody PersonDTO personDTO) throws PersonNotFoundException {
+        return personService.updatePerson(id, personDTO);
+
+    }
+
 }
